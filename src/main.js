@@ -178,9 +178,9 @@ function drawHandLandmarks(results) {
 
         // Draw connections (hand skeleton)
         drawConnections(landmarks);
-
         // Draw landmark points
         drawLandmarkPoints(landmarks);
+
 
         // Draw hand label
         const wrist = landmarks[0];
@@ -244,8 +244,39 @@ function drawLandmarkPoints(landmarks) {
     });
 }
 
+
+function joinlandmarks(landa, landb) {
+
+    canvasCtx.strokeStyle = '#00ff88';
+    canvasCtx.lineWidth = 2;
+
+
+    canvasCtx.beginPath();
+    canvasCtx.moveTo(landa.x * canvas.width, landa.y * canvas.height);
+    canvasCtx.lineTo(landb.x * canvas.width, landb.y * canvas.height);
+    canvasCtx.stroke();
+
+
+}
+
+function destroyjoin(landa, landb) {
+    canvasCtx.strokeStyle = '#00ff88';
+    canvasCtx.lineWidth = 0;
+
+
+    canvasCtx.beginPath();
+    canvasCtx.moveTo(landa.x * canvas.width, landa.y * canvas.height);
+    canvasCtx.lineTo(landb.x * canvas.width, landb.y * canvas.height);
+    canvasCtx.stroke();
+
+
+
+}
+
+
 function detectHands() {
 
+    let results = null;
     if (!handLandmarker || !video.videoWidth) {
         requestAnimationFrame(detectHands);
         return;
@@ -256,8 +287,8 @@ function detectHands() {
         processingCount++;
         lastVideoTime = video.currentTime;
 
-        const results = handLandmarker.detectForVideo(video, startTimeMs);
-        console.log(results)
+        results = handLandmarker.detectForVideo(video, startTimeMs);
+        // console.log(results)
 
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -277,7 +308,9 @@ function detectHands() {
     }
 
     requestAnimationFrame(detectHands);
+
 }
+
 
 let lastVideoTime = -1;
 let processingCount = 0;
@@ -288,4 +321,6 @@ const webcamReady = await initializeWebcam();
 if (!webcamReady) {
     console.error('Failed to initialize webcam');
 }
-detectHands();
+let results_cv = detectHands();
+
+// joinlandmarks()
