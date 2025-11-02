@@ -168,7 +168,6 @@ async function initializeWebcam() {
     }
 }
 
-
 function drawHandLandmarks(results) {
     if (!results.landmarks || results.landmarks.length === 0) return;
 
@@ -192,6 +191,9 @@ function drawHandLandmarks(results) {
             wrist.y * canvas.height - 10
         );
     }
+    let temp1 = [results.landmarks[0][8].x, results.landmarks[0][8].y]
+    let temp2 = [results.landmarks[0][4].x, results.landmarks[0][4].y]
+    // console.log(calcDist(temp1, temp2))
 }
 
 // Draw connections between landmarks (hand skeleton)
@@ -221,6 +223,7 @@ function drawConnections(landmarks) {
 
 // Draw landmark points
 function drawLandmarkPoints(landmarks) {
+    let tip_cords = []; // tipcords = [[x,y],[x,y]],tips = 4,8,12,16,20
     landmarks.forEach((landmark, index) => {
         const x = landmark.x * canvas.width;
         const y = landmark.y * canvas.height;
@@ -228,9 +231,11 @@ function drawLandmarkPoints(landmarks) {
         // Different colors for fingertips
         if ([4, 8, 12, 16, 20].includes(index)) {
             canvasCtx.fillStyle = '#00ccff'; // Fingertips
+            tip_cords[tip_cords.length] = [landmark.x, landmark.y]
         } else {
             canvasCtx.fillStyle = '#00ff88'; // Other points
         }
+
 
         canvasCtx.beginPath();
         canvasCtx.arc(x, y, 5, 0, 2 * Math.PI);
@@ -242,11 +247,37 @@ function drawLandmarkPoints(landmarks) {
         canvasCtx.fill();
         canvasCtx.shadowBlur = 0;
     });
+    // console.log(tip_cords)
+
+    let timestamp = performance.now();
+    let cooldown = 600;
+
+    let tap_occurs = checkTap(tip_cords, 0, 1);
+    console.log('TIME : ', timestamp - lastActionTime > cooldown)
+    if (timestamp - lastActionTime > cooldown) {
+
+        console.log('connected_state = ', connected_state)
+        console.log('tap_occurs = ', tap_occurs)
+        if (connected_state && tap_occurs) {
+            destroyjoin(landmarks[5], landmarks[8])
+            connected_state = false;
+            lastActionTime = timestamp;
+        }
+        else if (!connected_state && tap_occurs) {
+            joinlandmarks(landmarks[4], landmarks[8])
+            connected_state = true;
+            lastActionTime = timestamp;
+        }
+
+    }
+    if (connected_state && !tap_occurs) {
+        joinlandmarks(landmarks[4], landmarks[8])
+    }
 }
 
 
 function joinlandmarks(landa, landb) {
-
+    console.log('joining landmarks ', landa, landb)
     canvasCtx.strokeStyle = '#00ff88';
     canvasCtx.lineWidth = 2;
 
@@ -260,6 +291,7 @@ function joinlandmarks(landa, landb) {
 }
 
 function destroyjoin(landa, landb) {
+    console.log('destroying landmarks ', landa, landb)
     canvasCtx.strokeStyle = '#00ff88';
     canvasCtx.lineWidth = 0;
 
@@ -273,6 +305,35 @@ function destroyjoin(landa, landb) {
 
 }
 
+function calcDist(cordsA, cordsB) {
+    let [xA, yA] = cordsA;
+    let [xB, yB] = cordsB;
+
+    let x_diff_sqr = (xA - xB) * (xA - xB)
+    let y_diff_sqr = (yA - yB) * (yA - yB)
+
+    let dist = Math.abs(Math.sqrt(x_diff_sqr + y_diff_sqr))
+
+    return dist;
+}
+
+function checkTap(tipcords, tip1_index, tip2_index) {
+    // tipcords = [[x,y],[x,y]],tips = 4,8,12,16,20
+    let thumcords = tipcords[tip1_index];
+    let indexcords = tipcords[tip2_index];
+    let dist = calcDist(thumcords, indexcords)
+    let tap = false;
+    if (dist < 0.07) {
+        // console.log(true);
+        tap = true;
+    }
+    else {
+        // console.log(false);
+        tap = false;
+    }
+    return tap;
+
+}
 
 function detectHands() {
 
@@ -315,12 +376,13 @@ function detectHands() {
 let lastVideoTime = -1;
 let processingCount = 0;
 let skippedCount = 0;
+let connected_state = false;
+let lastActionTime = 0;
+
 
 createHandLandmarker();
 const webcamReady = await initializeWebcam();
 if (!webcamReady) {
     console.error('Failed to initialize webcam');
 }
-let results_cv = detectHands();
-
-// joinlandmarks()
+detectHands();
