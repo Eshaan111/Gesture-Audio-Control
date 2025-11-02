@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hand-Controlled Audio App</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <!-- Main Container -->
+  <div class="container">
+    
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1 class="title">
+          <span class="icon">🖐️</span>
+          Hand-Controlled Audio
+        </h1>
+        <p class="subtitle">Control audio effects with your hand gestures</p>
+      </div>
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        <span id="status-text">Initializing...</span>
+      </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <div class="main-grid">
+      
+      <!-- Left Panel: Video & Hand Tracking -->
+      <section class="video-panel panel">
+        <div class="panel-header">
+          <h2>Hand Tracking</h2>
+          <div class="fps-counter">
+            <span id="fps">0</span> FPS
+          </div>
+        </div>
+        <div class="video-container">
+          <video id="webcam" autoplay playsinline></video>
+          <canvas id="canvas"></canvas>
+          <div class="video-overlay">
+            <div class="overlay-message" id="camera-message">
+              <span class="camera-icon">📹</span>
+              <p>Requesting camera access...</p>
+            </div>
+          </div>
+        </div>
+        <div class="hand-info">
+          <div class="info-item">
+            <span class="label">Position</span>
+            <span class="value" id="hand-position">—</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Gesture</span>
+            <span class="value" id="gesture">None</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Center Panel: Audio Controls & Upload -->
+      <section class="control-panel panel">
+        <div class="panel-header">
+          <h2>Audio Control</h2>
+        </div>
+
+        <!-- Audio Upload -->
+        <div class="upload-section">
+          <input type="file" id="audio-upload" accept="audio/*" hidden>
+          <label for="audio-upload" class="upload-button">
+            <span class="upload-icon">📁</span>
+            <span>Upload Audio File</span>
+          </label>
+          <p class="upload-hint">MP3, WAV, OGG supported</p>
+        </div>
+
+        <!-- Audio Info -->
+        <div class="audio-info" id="audio-info" style="display: none;">
+          <div class="audio-title" id="audio-title">No file loaded</div>
+          <div class="audio-duration" id="audio-duration">0:00 / 0:00</div>
+        </div>
+
+        <!-- Waveform Visualization -->
+        <div class="waveform-container">
+          <canvas id="waveform" width="600" height="100"></canvas>
+        </div>
+
+        <!-- Playback Controls -->
+        <div class="playback-controls">
+          <button class="control-btn" id="play-btn" disabled>
+            <span class="btn-icon">▶️</span>
+            Play
+          </button>
+          <button class="control-btn" id="pause-btn" disabled>
+            <span class="btn-icon">⏸️</span>
+            Pause
+          </button>
+          <button class="control-btn" id="stop-btn" disabled>
+            <span class="btn-icon">⏹️</span>
+            Stop
+          </button>
+          <button class="control-btn secondary" id="reset-btn" disabled>
+            <span class="btn-icon">🔄</span>
+            Reset
+          </button>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+            <div class="progress-handle" id="progress-handle"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Effects & Visualization -->
+      <section class="effects-panel panel">
+        <div class="panel-header">
+          <h2>Audio Effects</h2>
+          <button class="toggle-btn" id="effects-toggle">
+            <span>ON</span>
+          </button>
+        </div>
+
+        <!-- Effect Meters -->
+        <div class="effects-grid">
+          
+          <div class="effect-item">
+            <div class="effect-header">
+              <span class="effect-name">Volume</span>
+              <span class="effect-value" id="volume-value">100%</span>
+            </div>
+            <div class="effect-meter">
+              <div class="meter-fill" id="volume-meter" style="width: 50%;"></div>
+            </div>
+          </div>
+
+          <div class="effect-item">
+            <div class="effect-header">
+              <span class="effect-name">Pitch</span>
+              <span class="effect-value" id="pitch-value">0</span>
+            </div>
+            <div class="effect-meter">
+              <div class="meter-fill pitch" id="pitch-meter" style="width: 50%;"></div>
+            </div>
+          </div>
+
+          <div class="effect-item">
+            <div class="effect-header">
+              <span class="effect-name">Speed</span>
+              <span class="effect-value" id="speed-value">1.0x</span>
+            </div>
+            <div class="effect-meter">
+              <div class="meter-fill speed" id="speed-meter" style="width: 50%;"></div>
+            </div>
+          </div>
+
+          <div class="effect-item">
+            <div class="effect-header">
+              <span class="effect-name">Bass</span>
+              <span class="effect-value" id="bass-value">0 dB</span>
+            </div>
+            <div class="effect-meter">
+              <div class="meter-fill bass" id="bass-meter" style="width: 50%;"></div>
+            </div>
+          </div>
+
+          <div class="effect-item">
+            <div class="effect-header">
+              <span class="effect-name">Filter</span>
+              <span class="effect-value" id="filter-value">10 kHz</span>
+            </div>
+            <div class="effect-meter">
+              <div class="meter-fill filter" id="filter-meter" style="width: 50%;"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Spectrum Analyzer -->
+        <div class="spectrum-container">
+          <h3 class="spectrum-title">Frequency Spectrum</h3>
+          <canvas id="spectrum" width="600" height="150"></canvas>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="instructions">
+          <h3>Hand Controls</h3>
+          <ul>
+            <li><strong>Hand Y:</strong> Pitch control</li>
+            <li><strong>Hand X:</strong> Speed control</li>
+            <li><strong>Pinch:</strong> Toggle effects</li>
+            <li><strong>Fist:</strong> Pause/Play</li>
+          </ul>
+        </div>
+        <div class="footer-info">
+          <p>Built with MediaPipe Hands & Web Audio API</p>
+          <p class="performance">
+            Latency: <span id="latency">0ms</span>
+          </p>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- JavaScript -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
