@@ -2,99 +2,280 @@ import {
     HandLandmarker,
     FilesetResolver
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
-
-
-/* ============================================
-   STATUS & HEADER ELEMENTS
-   ============================================ */
-
 const statusText = document.getElementById('status-text');
 const statusBadge = document.querySelector('.status-badge'); // Class, not ID
 const fpsDisplay = document.getElementById('fps');
-
-/* ============================================
-   VIDEO & HAND TRACKING ELEMENTS
-   ============================================ */
-
 const webcam = document.getElementById('webcam');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d'); // Canvas 2D context
 const cameraMessage = document.getElementById('camera-message');
 const videoOverlay = document.querySelector('.video-overlay'); // Class, not ID
-
 // Hand info displays
 const handPosition = document.getElementById('hand-position');
 const gestureDisplay = document.getElementById('gesture');
-
-/* ============================================
-   AUDIO CONTROL ELEMENTS
-   ============================================ */
-
 // Audio upload
 const audioUpload = document.getElementById('audio-upload');
-
 // Audio info displays
 const audioInfo = document.getElementById('audio-info');
 const audioTitle = document.getElementById('audio-title');
 const audioDuration = document.getElementById('audio-duration');
-
 // Waveform canvas
 const waveformCanvas = document.getElementById('waveform');
 const waveformCtx = waveformCanvas.getContext('2d');
-
 // Playback control buttons
 const playBtn = document.getElementById('play-btn');
 const pauseBtn = document.getElementById('pause-btn');
 const stopBtn = document.getElementById('stop-btn');
 const resetBtn = document.getElementById('reset-btn');
-
 // Progress bar elements
 const progressFill = document.getElementById('progress-fill');
 const progressHandle = document.getElementById('progress-handle');
-
-/* ============================================
-   EFFECTS PANEL ELEMENTS
-   ============================================ */
-
 // Effects toggle button
 const effectsToggle = document.getElementById('effects-toggle');
-
 // Volume effect
 const volumeValue = document.getElementById('volume-value');
 const volumeMeter = document.getElementById('volume-meter');
-
 // Pitch effect
 const pitchValue = document.getElementById('pitch-value');
 const pitchMeter = document.getElementById('pitch-meter');
-
 // Speed effect
 const speedValue = document.getElementById('speed-value');
 const speedMeter = document.getElementById('speed-meter');
-
 // Bass effect
 const bassValue = document.getElementById('bass-value');
 const bassMeter = document.getElementById('bass-meter');
-
 // Filter effect
 const filterValue = document.getElementById('filter-value');
 const filterMeter = document.getElementById('filter-meter');
-
-// Spectrum analyzer canvas
 const spectrumCanvas = document.getElementById('spectrum');
 const spectrumCtx = spectrumCanvas.getContext('2d');
-
-/* ============================================
-   FOOTER ELEMENTS
-   ============================================ */
-
 const latencyDisplay = document.getElementById('latency');
-
 const video = document.getElementById('webcam');
-const canvasCtx = canvas.getContext('2d');
 
+
+const canvasCtx = canvas.getContext('2d');
 let handLandmarker = undefined;
 let runningMode = "VIDEO";
 let webcamRunning = false;
+
+
+
+class AudioController {
+    constructor() {
+        this.context = null;
+        this.buffer = null;
+        this.source = null;
+        this.gainNode = null;
+        this.filterNode = null;
+        this.isPlaying = false;
+        this.startTime = 0;
+        this.pauseTime = 0;
+    }
+
+    async loadFile(file) {
+        if (!this.context) {
+            this.context = new AudioContext();
+            console.log('Sample rate:', this.context.sampleRate, 'Hz');
+
+            this.gainNode = this.context.createGain();
+            this.gainNode.gain.value = 1.0;
+
+            this.filterNode = this.context.createBiquadFilter();
+            this.filterNode.type = 'lowpass';
+            this.filterNode.frequency.value = 10000;
+        }
+
+        const arrayBuffer = await file.arrayBuffer();
+        this.buffer = await this.context.decodeAudioData(arrayBuffer);
+
+        console.log('✅ Audio loaded');
+        console.log('Duration:', this.buffer.duration, 'seconds');
+        console.log('Channels:', this.buffer.numberOfChannels);
+        console.log('Sample rate:', this.buffer.sampleRate, 'Hz');
+
+        // Reset state
+        this.isPlaying = false;
+        this.pauseTime = 0;
+        this.startTime = 0;
+
+        return this.buffer.duration;
+    }
+
+    play() {
+        if (!this.buffer) {
+            console.error('No audio loaded');
+            return;
+        }
+
+        // Already playing?
+        if (this.isPlaying) {
+            console.log('Already playing');
+            return;
+        }
+
+        // Stop old source if exists
+        if (this.source) {
+            try {
+                this.source.stop();
+            } catch (e) {
+                // Source already stopped
+            }
+            this.source.onended = null;
+        }
+
+        const offset = this.pauseTime;
+        console.log(`▶️ Playing from ${offset.toFixed(2)}s`);
+
+        // Create source
+        this.source = this.context.createBufferSource();
+        this.source.buffer = this.buffer;
+
+        // Connect graph
+        this.source.connect(this.filterNode);
+        this.filterNode.connect(this.gainNode);
+        this.gainNode.connect(this.context.destination);
+
+        // Start playback
+        this.source.start(0, offset);
+        this.startTime = this.context.currentTime - offset;
+        this.isPlaying = true;
+
+        // Handle natural end
+        this.source.onended = () => {
+            if (this.isPlaying) {
+                console.log('🏁 Playback finished');
+                this.isPlaying = false;
+                this.pauseTime = 0;
+                this.startTime = 0;
+            }
+        };
+    }
+
+    pause() {
+        if (!this.buffer) {
+            console.error('No audio loaded');
+            return;
+        }
+
+        if (!this.isPlaying) {
+            console.log('Not playing');
+            return;
+        }
+
+        console.log('⏸️ Pausing...');
+
+        // Calculate position
+        this.pauseTime = this.context.currentTime - this.startTime;
+
+        // ✅ CRITICAL: Set false BEFORE stopping
+        this.isPlaying = false;
+
+        // Stop playback
+        if (this.source) {
+            try {
+                this.source.stop();
+            } catch (e) {
+                console.error('Stop error:', e);
+            }
+        }
+
+        console.log(`⏸️ Paused at ${this.pauseTime.toFixed(2)}s`);
+    }
+
+    stop() {
+        if (!this.buffer) {
+            console.error('No audio loaded');
+            return;
+        }
+
+        console.log('⏹️ Stopping...');
+
+        // Set false before stopping
+        this.isPlaying = false;
+
+        // Stop source
+        if (this.source) {
+            try {
+                this.source.stop();
+            } catch (e) {
+                // Already stopped
+            }
+            this.source.onended = null;
+        }
+
+        // Reset to beginning
+        this.pauseTime = 0;
+        this.startTime = 0;
+
+        console.log('⏹️ Stopped');
+    }
+
+    getCurrentTime() {
+        if (!this.buffer) return 0;
+
+        if (this.isPlaying) {
+            const current = this.context.currentTime - this.startTime;
+            return Math.max(0, Math.min(current, this.buffer.duration));
+        }
+
+        return this.pauseTime;
+    }
+
+    setVolume(value) {
+        if (this.gainNode) {
+            this.gainNode.gain.value = value;
+        }
+    }
+
+    setFilter(frequency) {
+        if (this.filterNode) {
+            this.filterNode.frequency.value = frequency;
+        }
+    }
+}
+
+
+
+
+
+audioUpload.addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+
+    if (file && file.type.startsWith('audio/')) {
+        const audioController = new AudioController();
+        await audioController.loadFile(file)
+        playBtn.disabled = false;
+        pauseBtn.disabled = false;
+        stopBtn.disabled = false;
+        resetBtn.disabled = false;
+
+        playBtn.addEventListener('click', () => {
+            audioController.play();
+            console.log('▶️ Playing');
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            audioController.pause();
+            console.log('⏸️ Paused');
+        });
+
+        stopBtn.addEventListener('click', () => {
+            audioController.stop();
+            console.log('⏹️ Stopped');
+        });
+
+        resetBtn.addEventListener('click', () => {
+            audioController.stop();
+            console.log('🔄 Reset');
+        });
+
+        audioController.play()
+    };
+
+})
+
+
+
 
 const createHandLandmarker = async () => {
     try {
@@ -178,7 +359,7 @@ function drawHandLandmarks(results) {
         // Draw connections (hand skeleton)
         drawConnections(landmarks);
         // Draw landmark points
-        drawLandmarkPoints(landmarks);
+        drawLandmarkPoints(landmarks, handedness);
 
 
         // Draw hand label
@@ -196,6 +377,52 @@ function drawHandLandmarks(results) {
     // console.log(calcDist(temp1, temp2))
 }
 
+function tappingLogic(landmarks, handedness, tap_occurs) {
+
+    let timestamp = performance.now();
+    let cooldown = 600;
+    console.log('TIME : ', timestamp - lastActionTime > cooldown)
+    if (handedness == 'Left') {
+        if (timestamp - lastActionTime > cooldown) {
+
+            console.log('left connected_state = ', left_connected_state)
+            console.log('tap_occurs = ', tap_occurs)
+            if (left_connected_state && tap_occurs) {
+                destroyjoin(landmarks[5], landmarks[8])
+                left_connected_state = false;
+                lastActionTime = timestamp;
+            }
+            else if (!left_connected_state && tap_occurs) {
+                joinlandmarks(landmarks[4], landmarks[8])
+                left_connected_state = true;
+                lastActionTime = timestamp;
+            }
+        }
+        if (left_connected_state && !tap_occurs) {
+            joinlandmarks(landmarks[4], landmarks[8])
+        }
+    }
+    else if (handedness == 'Right') {
+        if (timestamp - lastActionTime > cooldown) {
+
+            console.log('right connected_state = ', right_connected_state)
+            console.log('tap_occurs = ', tap_occurs)
+            if (right_connected_state && tap_occurs) {
+                destroyjoin(landmarks[5], landmarks[8])
+                right_connected_state = false;
+                lastActionTime = timestamp;
+            }
+            else if (!right_connected_state && tap_occurs) {
+                joinlandmarks(landmarks[4], landmarks[8])
+                right_connected_state = true;
+                lastActionTime = timestamp;
+            }
+        }
+        if (right_connected_state && !tap_occurs) {
+            joinlandmarks(landmarks[4], landmarks[8])
+        }
+    }
+}
 // Draw connections between landmarks (hand skeleton)
 function drawConnections(landmarks) {
     const connections = [
@@ -222,7 +449,7 @@ function drawConnections(landmarks) {
 }
 
 // Draw landmark points
-function drawLandmarkPoints(landmarks) {
+function drawLandmarkPoints(landmarks, handedness) {
     let tip_cords = []; // tipcords = [[x,y],[x,y]],tips = 4,8,12,16,20
     landmarks.forEach((landmark, index) => {
         const x = landmark.x * canvas.width;
@@ -247,34 +474,11 @@ function drawLandmarkPoints(landmarks) {
         canvasCtx.fill();
         canvasCtx.shadowBlur = 0;
     });
-    // console.log(tip_cords)
-
-    let timestamp = performance.now();
-    let cooldown = 600;
-
     let tap_occurs = checkTap(tip_cords, 0, 1);
-    console.log('TIME : ', timestamp - lastActionTime > cooldown)
-    if (timestamp - lastActionTime > cooldown) {
+    tappingLogic(landmarks, handedness, tap_occurs)
 
-        console.log('connected_state = ', connected_state)
-        console.log('tap_occurs = ', tap_occurs)
-        if (connected_state && tap_occurs) {
-            destroyjoin(landmarks[5], landmarks[8])
-            connected_state = false;
-            lastActionTime = timestamp;
-        }
-        else if (!connected_state && tap_occurs) {
-            joinlandmarks(landmarks[4], landmarks[8])
-            connected_state = true;
-            lastActionTime = timestamp;
-        }
 
-    }
-    if (connected_state && !tap_occurs) {
-        joinlandmarks(landmarks[4], landmarks[8])
-    }
 }
-
 
 function joinlandmarks(landa, landb) {
     console.log('joining landmarks ', landa, landb)
@@ -376,7 +580,8 @@ function detectHands() {
 let lastVideoTime = -1;
 let processingCount = 0;
 let skippedCount = 0;
-let connected_state = false;
+let left_connected_state = false;
+let right_connected_state = false;
 let lastActionTime = 0;
 
 

@@ -1,9 +1,6 @@
-
 /* ============================================
-   HAND-CONTROLLED AUDIO APP - BLACK THEME
+   CSS Variables
    ============================================ */
-
-/* CSS Variables */
 :root {
   /* Colors - Dark Theme */
   --bg-primary: #0a0a0a;
@@ -57,9 +54,8 @@
 }
 
 /* ============================================
-   RESET & BASE STYLES
+   Global Reset & Base Styles
    ============================================ */
-
 * {
   margin: 0;
   padding: 0;
@@ -68,23 +64,21 @@
 
 html {
   font-size: 16px;
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: var(--font-family);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  line-height: 1.6;
-  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ============================================
-   CONTAINER & LAYOUT
-   ============================================ */
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
 
+/* ============================================
+   Container & Layout
+   ============================================ */
 .container {
   max-width: 1600px;
   margin: 0 auto;
@@ -93,18 +87,17 @@ body {
 }
 
 /* ============================================
-   HEADER
+   Header
    ============================================ */
-
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-xl);
   padding: var(--space-lg);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-primary);
+  margin-bottom: var(--space-xl);
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
   border-radius: var(--radius-lg);
+  border: 1px solid var(--border-primary);
   box-shadow: var(--shadow-md);
 }
 
@@ -115,14 +108,14 @@ body {
 .title {
   font-size: 2rem;
   font-weight: 700;
+  margin-bottom: var(--space-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: var(--space-xs);
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
 }
 
 .icon {
@@ -132,8 +125,7 @@ body {
 
 .subtitle {
   color: var(--text-secondary);
-  font-size: 1rem;
-  margin-left: 60px;
+  font-size: 0.95rem;
 }
 
 .status-badge {
@@ -145,15 +137,14 @@ body {
   border: 1px solid var(--border-secondary);
   border-radius: var(--radius-full);
   font-size: 0.875rem;
-  color: var(--text-secondary);
 }
 
 .status-dot {
   width: 8px;
   height: 8px;
-  background: var(--accent-warning);
   border-radius: 50%;
-  animation: pulse 2s infinite;
+  background: var(--accent-danger);
+  animation: pulse 2s ease-in-out infinite;
 }
 
 .status-badge.active .status-dot {
@@ -166,9 +157,8 @@ body {
 }
 
 /* ============================================
-   MAIN GRID LAYOUT
+   Main Grid Layout
    ============================================ */
-
 .main-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -176,33 +166,22 @@ body {
   margin-bottom: var(--space-xl);
 }
 
-@media (max-width: 1400px) {
-  .main-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  
-  .effects-panel {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .main-grid {
     grid-template-columns: 1fr;
   }
 }
 
 /* ============================================
-   PANEL COMPONENTS
+   Panel Base Styles
    ============================================ */
-
 .panel {
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
   box-shadow: var(--shadow-md);
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  transition: transform var(--transition-normal);
 }
 
 .panel:hover {
@@ -216,41 +195,40 @@ body {
   align-items: center;
   margin-bottom: var(--space-lg);
   padding-bottom: var(--space-md);
-  border-bottom: 1px solid var(--border-primary);
+  border-bottom: 2px solid var(--border-primary);
 }
 
 .panel-header h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--accent-primary);
 }
 
 /* ============================================
-   VIDEO PANEL
+   Video Panel
    ============================================ */
-
 .fps-counter {
-  font-size: 0.875rem;
-  color: var(--accent-primary);
-  font-family: var(--font-mono);
   background: var(--bg-tertiary);
   padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--accent-secondary);
+  border: 1px solid var(--border-secondary);
 }
 
 .video-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4/3;
   background: var(--bg-primary);
-  border: 2px solid var(--border-accent);
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: var(--shadow-glow);
   margin-bottom: var(--space-md);
 }
 
-#webcam {
+#webcam,
+#canvas {
   position: absolute;
   top: 0;
   left: 0;
@@ -260,11 +238,6 @@ body {
 }
 
 #canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
   pointer-events: none;
 }
 
@@ -280,12 +253,6 @@ body {
   background: rgba(10, 10, 10, 0.8);
   backdrop-filter: blur(10px);
   z-index: 10;
-  transition: opacity var(--transition-normal);
-}
-
-.video-overlay.hidden {
-  opacity: 0;
-  pointer-events: none;
 }
 
 .overlay-message {
@@ -296,12 +263,6 @@ body {
   font-size: 3rem;
   display: block;
   margin-bottom: var(--space-md);
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
 }
 
 .hand-info {
@@ -313,58 +274,56 @@ body {
 .info-item {
   background: var(--bg-tertiary);
   padding: var(--space-md);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-secondary);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
 }
 
-.label {
+.info-item .label {
+  display: block;
   font-size: 0.75rem;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-xs);
 }
 
-.value {
-  font-size: 1.125rem;
+.info-item .value {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
   color: var(--accent-primary);
   font-family: var(--font-mono);
-  font-weight: 600;
 }
 
 /* ============================================
-   CONTROL PANEL
+   Control Panel
    ============================================ */
-
 .upload-section {
   text-align: center;
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-lg);
 }
 
 .upload-button {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-lg) var(--space-xl);
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   color: var(--bg-primary);
-  font-weight: 600;
   border-radius: var(--radius-md);
+  font-weight: 600;
   cursor: pointer;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-  box-shadow: var(--shadow-glow);
-  font-size: 1.125rem;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-md);
 }
 
 .upload-button:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
 }
 
 .upload-button:active {
-  transform: translateY(0) scale(0.98);
+  transform: translateY(0);
 }
 
 .upload-icon {
@@ -380,17 +339,431 @@ body {
 .audio-info {
   background: var(--bg-tertiary);
   padding: var(--space-md);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   margin-bottom: var(--space-lg);
   border: 1px solid var(--border-secondary);
 }
 
 .audio-title {
   font-weight: 600;
-  color: var(--text-primary);
   margin-bottom: var(--space-xs);
+  color: var(--text-primary);
 }
 
 .audio-duration {
   font-size: 0.875rem;
-  color: var(--
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+/* ============================================
+   Waveform
+   ============================================ */
+.waveform-container {
+  width: 100%;
+  height: 100px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-primary);
+}
+
+#waveform {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ============================================
+   Playback Controls - FIXED STYLING
+   ============================================ */
+.playback-controls {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.control-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-accent);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  min-width: 100px;
+}
+
+.control-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.control-btn .btn-icon,
+.control-btn span {
+  position: relative;
+  z-index: 1;
+}
+
+.control-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+  border-color: var(--accent-primary);
+}
+
+.control-btn:hover:not(:disabled)::before {
+  opacity: 0.15;
+}
+
+.control-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.control-btn.active {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: var(--bg-primary);
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-glow);
+}
+
+.control-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: var(--border-secondary);
+}
+
+.control-btn.secondary {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-secondary);
+  min-width: 90px;
+}
+
+.control-btn.secondary:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-accent);
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+/* ============================================
+   Progress Bar
+   ============================================ */
+.progress-container {
+  margin-bottom: var(--space-lg);
+}
+
+.progress-bar {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  overflow: visible;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: var(--radius-full);
+  transition: width 100ms linear;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.progress-handle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  background: var(--accent-primary);
+  border: 2px solid var(--bg-primary);
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow: var(--shadow-glow);
+  transition: all var(--transition-fast);
+}
+
+.progress-handle:active {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* ============================================
+   Effects Panel
+   ============================================ */
+.toggle-btn {
+  padding: var(--space-xs) var(--space-md);
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.toggle-btn:hover {
+  background: var(--accent-secondary);
+  transform: scale(1.05);
+}
+
+.effects-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.effect-item {
+  background: var(--bg-tertiary);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-secondary);
+}
+
+.effect-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.effect-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.effect-value {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.effect-meter {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: var(--radius-full);
+  transition: width var(--transition-fast);
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+}
+
+.meter-fill.pitch {
+  background: linear-gradient(90deg, #ff00ff, #00ffff);
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
+}
+
+.meter-fill.speed {
+  background: linear-gradient(90deg, #ffaa00, #ff6600);
+  box-shadow: 0 0 8px rgba(255, 170, 0, 0.4);
+}
+
+.meter-fill.bass {
+  background: linear-gradient(90deg, #ff4444, #ff8844);
+  box-shadow: 0 0 8px rgba(255, 68, 68, 0.4);
+}
+
+.meter-fill.filter {
+  background: linear-gradient(90deg, #00ccff, #0088ff);
+  box-shadow: 0 0 8px rgba(0, 204, 255, 0.4);
+}
+
+/* ============================================
+   Spectrum Analyzer
+   ============================================ */
+.spectrum-container {
+  background: var(--bg-primary);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+}
+
+.spectrum-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+#spectrum {
+  width: 100%;
+  height: 150px;
+  display: block;
+  border-radius: var(--radius-sm);
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+.footer {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-top: var(--space-xl);
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-xl);
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.instructions h3 {
+  font-size: 1.1rem;
+  color: var(--accent-primary);
+  margin-bottom: var(--space-md);
+}
+
+.instructions ul {
+  list-style: none;
+}
+
+.instructions li {
+  padding: var(--space-xs) 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.instructions strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.footer-info {
+  text-align: right;
+}
+
+.footer-info p {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-bottom: var(--space-xs);
+}
+
+.performance {
+  font-family: var(--font-mono);
+  color: var(--accent-secondary);
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+.hidden {
+  display: none !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.panel {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-md);
+  }
+  
+  .header {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-md);
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .playback-controls {
+    flex-direction: column;
+  }
+  
+  .control-btn {
+    width: 100%;
+  }
+}
